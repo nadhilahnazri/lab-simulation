@@ -1,7 +1,8 @@
 # lab-simulation
 
-## Experiment 1 demo
-![Demo](experiment1.mp4)
+## Demo
+
+https://github.com/user-attachments/assets/aeb429ef-a1ac-4812-aa9c-f4c05853a66c
 
 ## To embed code
 
