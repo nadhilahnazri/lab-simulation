@@ -1,5 +1,13 @@
 # lab-simulation
 
+## Experiment 1 demo
+![Demo](experiment1.mp4)
+
+## To embed code
+
+Download all files and folders (except for this README)
+Ensure all directories are properly nested
+
 ## Ready to deploy
 
 Run the code below in the terminal:
