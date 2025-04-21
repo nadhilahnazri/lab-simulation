@@ -5,7 +5,7 @@
 }
 
 body {
-  font-family: 'Trebuchet MS', sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   margin: 0;
   overflow: hidden; /* Prevent scrolling */
   display: flex;
@@ -58,7 +58,7 @@ body {
 
 .instructions {
   color: white;
-  font-family: 'Trebuchet MS', sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
   font-size: 1.5vw;
   font-weight: bold;
   text-align: center;
@@ -66,4 +66,76 @@ body {
   word-wrap: break-word;
   white-space: pre-wrap;
   width: 100%;
+}
+
+/* Intro Overlay */
+.overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  z-index: 999; /* Make sure it's above the canvas */
+  cursor: pointer;
+  animation: fadeIn 1s ease-out forwards;
+}
+
+#intro-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  width: 70%;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.character {
+  width: 10rem;
+  animation: fadeIn 1.2s ease-out forwards;
+}
+
+.speech-bubble {
+  background: white;
+  padding: 1rem 1.5rem;
+  margin-top: 1rem;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-family: Arial, Helvetica, sans-serif;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  animation: fadeIn 1.2s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#progress-container {
+  width: 50%;
+  height: 10px;
+  background: #444;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+#progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #b1006d;
+  transition: width 0.3s ease;
+}
+
+.overlay.fade-out {
+  animation: fadeOut 0.7s ease forwards;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; visibility: hidden; }
 }

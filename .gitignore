@@ -1,0 +1,8 @@
+# Ignore Node dependencies
+node_modules/
+
+# Ignore build/dist output
+dist/
+
+# Ignore package metadata
+package-lock.json

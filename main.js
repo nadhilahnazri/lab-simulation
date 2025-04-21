@@ -12,14 +12,40 @@ let coverSlip;
 let elodeasps;
 let microscope;
 let apparatus1;
+let imageCircle;
+
 
 let step = -1;
 const steps = [
     "Step 1:\nObtain Elodea sp. leaf and place on clean slide.",
     "Step 2:\nDrop fresh water onto leaf and place cover slip on top.",
     "Step 3:\nPlace slide under microscope and observe.",
+    "Step 4:\nObserve results by adjusting to low and medium power.",
     "END OF EXPERIMENT" // Empty string for the last step
 ];
+
+// Intro and conclusion overlays
+const introOverlay = document.getElementById('intro-overlay');
+const introMessage = document.getElementById('intro-message');
+const progressBar = document.getElementById('progress-bar');
+const loadingManager = new THREE.LoadingManager();
+
+loadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    const progress = (itemsLoaded / itemsTotal) * 100;
+    progressBar.style.width = `${progress}%`;
+}
+
+loadingManager.onLoad = () => {
+    introMessage.innerText = "Click anywhere to start";
+    progressBar.style.width = '100%';
+
+    introOverlay.addEventListener('click', () => {
+        introOverlay.classList.add('fade-out');
+        setTimeout(() => {
+            introOverlay.style.display = 'none';
+        }, 700); // Match the duration of the fade-out animation
+    });
+};
 
 // Create scene
 const scene = new THREE.Scene();
@@ -31,46 +57,22 @@ camera.position.set(0, 5, 10);
 
 
 // Create renderer
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+let renderer;
+if (!isSoftwareRenderer()) {
+    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(window.devicePixelRatio);
+}
+else {
+    renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance'  });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+}
+// Common config
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
 renderer.shadowMap.enabled = true;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.getElementById('three-container').appendChild(renderer.domElement); // Attach to correct div
-
-
-// Add raycaster events
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-
-// Events when mouse is clicked
-document.addEventListener('click', onMouseClick, false);
-function onMouseClick(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-
-    const intersects = raycaster.intersectObject(leaf, true);
-
-    if (intersects.length > 0) {
-        if (animateStep && step === 0) {
-            stepOne();
-            animateStep = false;
-        } else if (animateStep && step === 1) {
-            stepTwo();
-            animateStep = false;
-        } else if (animateStep && step === 2) {
-            // stepThree();
-            animateStep = false;
-        } else {
-            resetAll();
-            animateStep = false;
-        }
-    }
-}
 
 
 // Functions
@@ -99,6 +101,8 @@ function nextStep() {
         stepTwo(() => { animateReady = true; });
     } else if (step === 2) {
         stepThree(() => { animateReady = true; });
+    } else if (step === 3) {
+        stepFour(() => { animateReady = true; });
     } else {
         resetAll(() => { animateReady = true; });
     }
@@ -120,6 +124,7 @@ function resetAll(onComplete) {
     const coverSlipStart = coverSlip.position.clone();
     const slideStart = slide.position.clone();
     const dropperStart = dropper.position.clone();
+    const imageCircleStart = imageCircle.position.clone();
 
     // Store original rotations
     const leafRotationStart = leaf.rotation.clone();
@@ -129,6 +134,7 @@ function resetAll(onComplete) {
 
     // Target positions (original positions)
     const targetPosition = new THREE.Vector3(0, 0, 0);
+    const imageCircleTarget = new THREE.Vector3(1.65, 3, 3.5);
 
     // Target rotations (original rotations)
     const targetRotation = new THREE.Euler(0, 0, 0); // Assuming initial rotations are (0, 0, 0)
@@ -142,6 +148,10 @@ function resetAll(onComplete) {
         coverSlip.position.lerpVectors(coverSlipStart, targetPosition, t);
         slide.position.lerpVectors(slideStart, targetPosition, t);
         dropper.position.lerpVectors(dropperStart, targetPosition, t);
+
+        // Reset & resize image circle position
+        imageCircle.position.lerpVectors(imageCircleStart, imageCircleTarget, t);
+        imageCircle.scale.set(1 - 0.8 * t, 1 - 0.8 * t, 1 - 0.8 * t); // Scale down from 1 to 0.2
 
         // Reset rotations smoothly
         leaf.rotation.set(
@@ -340,6 +350,30 @@ function stepThree(onComplete) {
     animate();
 }
 
+function stepFour(onComplete) {
+    const imageCircleTarget = new THREE.Vector3(2.1, 4, 4);
+    const imageCircleStart = imageCircle.position.clone();
+
+    const duration = 1000; // Duration of the animation in milliseconds
+    const startTime = performance.now();
+
+    function animate() {
+        const elapsedTime = performance.now() - startTime;
+        const t = Math.min(elapsedTime / duration, 1); // Normalize time to [0, 1]
+
+        imageCircle.scale.set(0.2 + 0.8 * t, 0.2 + 0.8 * t, 0.2 + 0.8 * t); // Scale up to 1
+        imageCircle.position.lerpVectors(imageCircleStart, imageCircleTarget, t);
+
+        if (t < 1) {
+            requestAnimationFrame(animate);
+        } else {
+            if (onComplete) onComplete(); // Animation complete, allow nextStep
+        }
+    }
+
+    animate();
+}
+
 const fontLoader = new FontLoader();
 function addLabel(text) {
     fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
@@ -365,12 +399,22 @@ const controls = new OrbitControls(camera, renderer.domElement);
 
 controls.enableDamping = true; // smooth camera movement
 controls.enablePan = false;
-controls.minDistance = 7; // min zoom
-controls.maxDistance = 10; // max zoom
-controls.minPolarAngle = 1.0;
-controls.maxPolarAngle = 1.2;
-controls.minAzimuthAngle = -0.5;
-controls.maxAzimuthAngle = 0.5;
+
+if (!isSoftwareRenderer()) {
+    controls.minDistance = 7; // min zoom
+    controls.maxDistance = 10; // max zoom
+    controls.minPolarAngle = 1.0;
+    controls.maxPolarAngle = 1.2;
+    controls.minAzimuthAngle = -0.5;
+    controls.maxAzimuthAngle = 0.5;
+}
+else {
+    controls.enableRotate = false;
+    controls.enableZoom = true;
+    controls.minDistance = 7; // min zoom
+    controls.maxDistance = 10; // max zoom
+}
+
 controls.autoRotate = false;
 controls.update();
 
@@ -379,40 +423,42 @@ controls.update();
 const ambientLight = new THREE.AmbientLight(0xffffff, 1);
 scene.add(ambientLight);
 
-// ********** left stool **********
-const light1 = new THREE.DirectionalLight(0xffe6cc, 0.3);
-light1.position.set(-10.01, 15.596, -14.712);
-light1.castShadow = true;
-light1.shadow.mapSize.set = (1024, 1024);
-scene.add(light1);
+if (!isSoftwareRenderer()) {
+    // ********** left stool **********
+    const light1 = new THREE.DirectionalLight(0xffe6cc, 0.3);
+    light1.position.set(-10.01, 15.596, -14.712);
+    light1.castShadow = true;
+    light1.shadow.mapSize.set = (1024, 1024);
+    scene.add(light1);
 
-// ********** right stool **********
-const light2 = new THREE.DirectionalLight(0xffe6cc, 0.3);
-light2.position.set(13.879, 15.596, -14.818);
-light2.castShadow = true;
-light2.shadow.mapSize.set = (1024, 1024);
-scene.add(light2);
+    // ********** right stool **********
+    const light2 = new THREE.DirectionalLight(0xffe6cc, 0.3);
+    light2.position.set(13.879, 15.596, -14.818);
+    light2.castShadow = true;
+    light2.shadow.mapSize.set = (1024, 1024);
+    scene.add(light2);
 
-// ********** floor **********
-const light3 = new THREE.DirectionalLight(0xcc99ff, 1);
-light3.position.set(-10.078, 15.596, 9.475);
-light3.castShadow = true;
-light3.shadow.mapSize.set = (1024, 1024);
-scene.add(light3);
+    // ********** floor **********
+    const light3 = new THREE.DirectionalLight(0xcc99ff, 1);
+    light3.position.set(-10.078, 15.596, 9.475);
+    light3.castShadow = true;
+    light3.shadow.mapSize.set = (1024, 1024);
+    scene.add(light3);
 
-// ********** left wall **********
-const light4 = new THREE.DirectionalLight(0xaaccff, 1);
-light4.position.set(12.656, 15.596, 9.611);
-light4.castShadow = true;
-light4.shadow.mapSize.set = (1024, 1024);
-scene.add(light4);
+    // ********** left wall **********
+    const light4 = new THREE.DirectionalLight(0xaaccff, 1);
+    light4.position.set(12.656, 15.596, 9.611);
+    light4.castShadow = true;
+    light4.shadow.mapSize.set = (1024, 1024);
+    scene.add(light4);
 
-// ********** right wall **********
-const light5 = new THREE.DirectionalLight(0xffffff, 0.5);
-light5.position.set(-17.477, 8.398, 3.335);
-light5.castShadow = true;
-light5.shadow.mapSize.set = (1024, 1024);
-scene.add(light5);
+    // ********** right wall **********
+    const light5 = new THREE.DirectionalLight(0xffffff, 0.5);
+    light5.position.set(-17.477, 8.398, 3.335);
+    light5.castShadow = true;
+    light5.shadow.mapSize.set = (1024, 1024);
+    scene.add(light5);
+}
 
 // ********** top down **********
 const light6 = new THREE.DirectionalLight(0xffe6cc, 0.1);
@@ -431,8 +477,8 @@ scene.add(light7);
 
 // Create models
 // ********** Lab **********
-const gltfLoader = new GLTFLoader();
-gltfLoader.load('public/3D_Lab.gltf', function(gltf){
+const gltfLoader = new GLTFLoader(loadingManager);
+gltfLoader.load('./public/3D_Lab.gltf', function(gltf){
     const model = gltf.scene;
     scene.add(model);
     model.scale.set(40, 40, 40); // Scale up model
@@ -442,7 +488,7 @@ gltfLoader.load('public/3D_Lab.gltf', function(gltf){
 });
 
 // ********** Experiment 1 **********
-gltfLoader.load('public/3D_Expt1_Nolight.gltf', function(gltf){
+gltfLoader.load('./public/3D_Expt1_Nolight.gltf', function(gltf){
     apparatus1 = gltf.scene;
     scene.add(apparatus1);
     apparatus1.scale.set(40, 40, 40); // Scale up model
@@ -466,7 +512,7 @@ gltfLoader.load('public/3D_Expt1_Nolight.gltf', function(gltf){
 });
 
 // ********** Compound Microscope **********
-gltfLoader.load('public/3D_Expt1_CMicroscope_Nolight.gltf', function(gltf){
+gltfLoader.load('./public/3D_Expt1_CMicroscope_Nolight.gltf', function(gltf){
     const cMicroscope = gltf.scene;
     scene.add(cMicroscope);
     cMicroscope.scale.set(0.3, 0.3, 0.3); // Scale down model
@@ -477,7 +523,7 @@ gltfLoader.load('public/3D_Expt1_CMicroscope_Nolight.gltf', function(gltf){
 });
 
 // ********** Petri Dish **********
-gltfLoader.load('public/3D_Expt1_PetriDish_Nolight.gltf', function(gltf){
+gltfLoader.load('./public/3D_Expt1_PetriDish_Nolight.gltf', function(gltf){
     const petriDish = gltf.scene;
     scene.add(petriDish);
     petriDish.scale.set(0.4, 0.4, 0.4); // Scale down model
@@ -485,6 +531,33 @@ gltfLoader.load('public/3D_Expt1_PetriDish_Nolight.gltf', function(gltf){
 }, undefined, function(error){
     console.error('Error loading model: ', error);
 });
+
+// ********** Results Circle Image **********
+const resultTextureLoader = new THREE.TextureLoader();
+
+resultTextureLoader.load('./public/elodea_result.jpeg', function (texture) {
+    const geometry = new THREE.CircleGeometry(0.5, 64); // radius = 1, 64 segments for smoothness
+    const material = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        side: THREE.DoubleSide // so it's visible from both sides
+    });
+
+    imageCircle = new THREE.Mesh(geometry, material);
+    imageCircle.name = 'ImageCircle';
+
+    // Initial position (you can change this later)
+    // imageCircle.position.set(2.1, 4, 4);
+    imageCircle.scale.set(0.2, 0.2, 0.2); // Scale down the image
+    imageCircle.position.set(1.65, 3, 3.5);
+
+    // Make it face the camera
+    imageCircle.lookAt(camera.position);
+
+    // Add to scene
+    scene.add(imageCircle);
+});
+
 
 // Resize handler
 function resizeTablet() {
@@ -536,3 +609,32 @@ function animate() {
 }
 
 animate();
+
+
+// Check device capabilities
+function isSoftwareRenderer() {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+
+    if (!gl) return true; // WebGL not supported at all
+
+    const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+    if (!debugInfo) return false; // Can't detect, assume hardware
+
+    const renderer = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+    return renderer.toLowerCase().includes('swiftshader') || renderer.toLowerCase().includes('software');
+}
+
+if (isSoftwareRenderer()) {
+    const notice = document.createElement('div');
+    notice.innerText = "⚠️ You're in low-performance mode. Enable hardware acceleration for best experience.";
+    notice.style.position = 'absolute';
+    notice.style.top = '10px';
+    notice.style.left = '10px';
+    notice.style.padding = '10px';
+    notice.style.background = 'rgba(0,0,0,0.7)';
+    notice.style.color = 'white';
+    notice.style.fontSize = '14px';
+    notice.style.zIndex = '999';
+    document.body.appendChild(notice);
+}
