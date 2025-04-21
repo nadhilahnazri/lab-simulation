@@ -117,27 +117,24 @@ function onMouseMove(event) {
 }
 
 // Add text label above intersected object
-function addLabel(text, position) {
-    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-        const textGeometry = new TextGeometry(text, {
-            font: font,
-            size: 0.5,
-            depth: 0.1
-        })
+// function addLabel(text) {
+//     fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+//         const textGeometry = new TextGeometry(text, {
+//             font: font,
+//             size: 0.5,
+//             depth: 0.1
+//         })
 
-        const textMesh = new THREE.Mesh(textGeometry, [
-            new THREE.MeshPhongMaterial({ color: 0xffffff }), // front
-            new THREE.MeshPhongMaterial({ color: 0x000000 }) // side
-        ])
+//         const textMesh = new THREE.Mesh(textGeometry, [
+//             new THREE.MeshPhongMaterial({ color: 0xffffff }), // front
+//             new THREE.MeshPhongMaterial({ color: 0x000000 }) // side
+//         ])
 
-        textMesh.castShadow = true;
-        textMesh.position.copy(position);
-        textMesh.position.y += 4;
-        //textMesh.position.x += -0.5;
-        scene.add(textMesh);
-        label = textMesh;
-    });
-}
+//         textMesh.castShadow = true;
+//         //textMesh.position.x += -0.5;
+//         scene.add(textMesh);
+//     });
+// }
 
 // Events when mouse is clicked
 document.addEventListener('click', onMouseClick, false);
@@ -157,7 +154,7 @@ function onMouseClick(event) {
             stepTwo();
             animateStep = false;
         } else if (animateStep && step === 2) {
-            // stepThree();
+            stepThree();
             animateStep = false;
         } else {
             resetAll();
@@ -408,19 +405,19 @@ function stepThree(onComplete) {
     const startTime = performance.now();
 
     // Leaf movement & rotation
-    const leafTarget = new THREE.Vector3(11.5, 1.3, -1);
+    const leafTarget = new THREE.Vector3(11.5, 1.3, -1.31);
     const leafStart = leaf.position.clone();
     const leafRotationStart = leaf.rotation.clone(); 
     const leafRotationTarget = new THREE.Euler(leafRotationStart.x, leafRotationStart.y, leafRotationStart.z + THREE.MathUtils.degToRad(35));
 
     // Slide movement & rotation
     const slideStart = slide.position.clone();
-    const slideTarget = new THREE.Vector3(10.4, 0.4, -1);
+    const slideTarget = new THREE.Vector3(10.4, 0.4, -1.31);
     const slideRotationStart = slide.rotation.clone();
     const slideRotationTarget = new THREE.Euler(slideRotationStart.x, slideRotationStart.y, slideRotationStart.z + THREE.MathUtils.degToRad(37));
 
     // CoverSlip movement & rotation
-    const coverSlipTarget = new THREE.Vector3(8.3, -1.15, -1.1);
+    const coverSlipTarget = new THREE.Vector3(8.3, -1.15, -1.41);
     const coverSlipStart = coverSlip.position.clone();
     const coverSlipRotationStart = coverSlip.rotation.clone();
     const coverSlipRotationTarget = new THREE.Euler(coverSlipRotationStart.x, coverSlipRotationStart.y, coverSlipRotationStart.z + THREE.MathUtils.degToRad(37));
@@ -531,7 +528,6 @@ light7.castShadow = true;
 light7.shadow.mapSize.set = (1024, 1024);
 scene.add(light7);
 
-
 // Create models
 // ********** Lab **********
 const gltfLoader = new GLTFLoader();
@@ -544,24 +540,71 @@ gltfLoader.load('public/3D_Lab.gltf', function(gltf){
     console.error('Error loading model: ', error);
 });
 
+function addLabel(text) {
+    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
+        const textGeometry = new TextGeometry(text, {
+            font: font,
+            size: 0.2,
+            depth: 0.1
+        })
+
+        const textMesh = new THREE.Mesh(textGeometry, [
+            new THREE.MeshPhongMaterial({ color: 0xffffff }), // front
+            new THREE.MeshPhongMaterial({ color: 0x000000 }) // side
+        ])
+
+        textMesh.castShadow = true;
+        textMesh.position.set(-1.65, 2.8, 3.5);
+        scene.add(textMesh);
+    });
+}
+
+
+
 // ********** Experiment 1 **********
 gltfLoader.load('public/3D_Expt1_Nolight.gltf', function(gltf){
     apparatus1 = gltf.scene;
     scene.add(apparatus1);
     apparatus1.scale.set(40, 40, 40); // Scale up model
-    // apparatus1.position.set(-3, -2.3, -3.2);
     leaf = scene.getObjectByName('LEAF');
     slide = scene.getObjectByName('SLIDE');
     dropper = scene.getObjectByName('DROPPER');
     coverSlip = scene.getObjectByName('COVERSLIP');
     elodeasps = scene.getObjectByName('ELODEASPS');
-    microscope = scene.getObjectByName('MICROSCOPE');
+    elodeasps = scene.getObjectByName('ELODEASPS');
+    if (elodeasps) {
+        // Add label above Elodea sp.
+        addLabel('Elodea sp.');
+    }
+    if (scene.getObjectByName('MICROSCOPE')) {
+        scene.getObjectByName('MICROSCOPE').visible = false; // Hide the object
+    }
     
     console.log('Expt1 loaded');
 }, undefined, function(error){
     console.error('Error loading Expt1: ', error);
 });
 
+// ********** Compound Microscope **********
+gltfLoader.load('public/3D_Expt1_CMicroscope_Nolight.gltf', function(gltf){
+    const cMicroscope = gltf.scene;
+    scene.add(cMicroscope);
+    cMicroscope.scale.set(0.3, 0.3, 0.3); // Scale down model
+    cMicroscope.position.set(0.33, 0.6, 1);
+    microscope = scene.getObjectByName('COMPOUNDMICROSCOPE');
+}, undefined, function(error){
+    console.error('Error loading model: ', error);
+});
+
+// ********** Petri Dish **********
+gltfLoader.load('public/3D_Expt1_PetriDish_Nolight.gltf', function(gltf){
+    const petriDish = gltf.scene;
+    scene.add(petriDish);
+    petriDish.scale.set(0.4, 0.4, 0.4); // Scale down model
+    petriDish.position.set(0.54, -0.01, 0.04);
+}, undefined, function(error){
+    console.error('Error loading model: ', error);
+});
 
 // Resize handler
 function resizeTablet() {
