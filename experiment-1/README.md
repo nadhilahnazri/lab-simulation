@@ -1,4 +1,4 @@
-# lab-simulation
+# Experimet 1: Elodea
 
 ## Greendea Gems Demo
 https://github.com/user-attachments/assets/0b55e17c-c590-47dd-965f-2daeaa2b6744
