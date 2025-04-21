@@ -1,13 +1,4 @@
-# lab-simulation
+This is the GitHub repository for the lab simulation pages. Go to each folder to see simulations of each experiments:
 
-## Ready to deploy
-
-Run the code below in the terminal:
-```
-npm install
-npx vite build
-npx serve
-```
-
-visit the listed website in terminal:
-[http://127.0.0.1:5500/index.html](http://127.0.0.1:5500/index.html)
+1 experiment-1: Elodea
+2 experiment-2: Yeast
