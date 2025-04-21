@@ -1,9 +1,9 @@
 # lab-simulation
 
-## Demo Video
+## Greendea Gems Demo
+https://github.com/user-attachments/assets/0b55e17c-c590-47dd-965f-2daeaa2b6744
 
-Greendea Gems Demo
-![Experiment 1](experiment-1/experiment1.mp4)
+
 
 ## Ready to deploy
 
@@ -15,4 +15,5 @@ npx serve
 ```
 
 visit the listed website in terminal, such as:
+
 [http://127.0.0.1:5500/index.html](http://127.0.0.1:5500/index.html)
