@@ -1,5 +1,8 @@
 # LAB SIMULATION EXPERIMENTS
 
+[**Link to the Github Page**] (https://nadhilahnazri.github.io/lab-simulation/)
+
+
 1. [Experiment 1: Elodea](experiment-1)
 2. [Experiment 2: Yeast](experiment-2)
 3. [Experiment 3: Powder](experiment-3)

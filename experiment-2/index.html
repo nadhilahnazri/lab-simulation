@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 2: Yeast</title>
+	<link rel="stylesheet" href="./public/index.css">
+
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@v0.163.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@v0.163.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- Intro and conclusion -->
+    <div id="intro-overlay" class="overlay">
+        <div id="intro-container">
+            <img src="./public/2DLabAssistant.png" class="character" />
+            <div class="speech-bubble" id="speech-text">
+                <div style="text-align: center;"><b>Power of Yeast</b></div>
+                <br>
+                Yeast is a type of fungus, a tiny living organism you can't see with the naked eye. It's a single-celled organism, meaning it's made up of just one cell.
+                <br><br>
+                Do you know how the yeast respires?<br>
+                Yeast can respire in two ways:<br><br>
+                1. <b>Aerobic Respiration:</b> This happens when there's plenty of oxygen around. Yeast uses oxygen to break down sugar (like glucose) into carbon dioxide, water, and energy.<br>
+                2. <b>Anaerobic Respiration (Fermentation):</b> When there's not enough oxygen, yeast switches to fermentation. In this process, it breaks down sugar into carbon dioxide, alcohol, and energy.<br><br>
+                You can easily observe yeast respiration at home. Here's a simple experiment
+            </div>
+        </div>
+        <div id="intro-message">Scene loading...</div>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+      
+    <div id="conclusion-overlay" class="overlay">
+        <div id="conclusion-container">
+            <img src="./public/2DLabAssistant.png" class="character" />
+            <div class="speech-bubble" id="conclusion-speech-bubble">
+                <div style="text-align: center;"><b>CONCLUSION:</b></div>
+                <br><br>The balloon will inflate as the yeast cells respire and produce carbon dioxide gas. The gas will fill the balloon, causing it to expand. This experiment provides visual evidence of carbon dioxide production by yeast during respiration.
+            </div>
+        </div>
+        <div id="conclusion-message">Click anywhere to restart!</div>
+    </div>
+
+    <!-- Three.js will render here -->
+    <div id="three-container"></div>
+
+    <!-- 📌 Instructions Tablet (Always in the Corner) -->
+    <div class="tablet-container">
+        <div class="tablet-outline">
+            <div class="tablet">
+                <p class="instructions">Click Here to Start Experiment</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./main.js"></script> <!-- change file here -->
+
+</body>
+</html>
+
