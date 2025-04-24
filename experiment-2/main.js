@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 // Text
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
@@ -853,6 +854,9 @@ gltfLoader.load('./public/3D_Lab.gltf', function(gltf){
 });
 
 // ********** Experiment 2 **********
+const dracoLoader = new DRACOLoader();
+dracoLoader.setDecoderPath('https://unpkg.com/three@0.163.0/examples/jsm/libs/draco/');
+gltfLoader.setDRACOLoader(dracoLoader);
 gltfLoader.load('./public/3D_Expt2.gltf', function(gltf){
     apparatus2 = gltf.scene;
     scene.add(apparatus2);
