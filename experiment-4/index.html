@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 4: Bacteria</title>
+	<link rel="stylesheet" href="./public/index.css">
+
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@v0.163.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@v0.163.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- Intro and conclusion -->
+    <div id="intro-overlay" class="overlay">
+        <div id="intro-container">
+            <img src="./public/2DLabAssistant.png" class="character" />
+            <div class="speech-bubble" id="speech-text">
+                <div style="text-align: center;"><b>Bacteria Around Us</b></div>
+                <br>
+                Have you ever wondered about the invisible world of bacteria surrounding us? From the surfaces we touch daily to the air we breathe, bacteria are everywhere. These microscopic organisms play essential roles in ecosystems and human health, but they can also cause contamination and disease.
+                <br><br>
+                In this experiment, we will explore the fascinating world of bacteria. You'll learn how to:<br><br>
+                <ul>
+                    <li><b>Collect bacteria</b> samples from various surfaces.</li>
+                    <li><b>Grow bacterial colonies</b> using agar in Petri dishes.</li>
+                    <li><b>Observe and analyse</b> the size, shape, and colour of bacterial colonies.</li>
+                </ul>
+                <br><br>
+                By conducting this activity, you'll gain insight into the diversity of bacteria in our environment and the importance of hygiene in minimizing harmful microbial exposure. Are you ready to uncover the unseen microbial world? Let's begin!
+            </div>
+        </div>
+        <div id="intro-message">Scene loading...</div>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+      
+    <div id="conclusion-overlay" class="overlay">
+        <div id="conclusion-container">
+            <img src="./public/2DLabAssistant.png" class="character" />
+            <div class="speech-bubble" id="conclusion-speech-bubble">
+                <div style="text-align: center;"><b>CONCLUSION:</b></div>
+                <br><br>In this experiment, we uncovered the hidden world of bacteria by collecting an growing samples from our surroundings. We observed that bacteria are present on many surfaces, forming colonies of varying sizes, shapes, and colours. This activity highlighted the diversity of bacterial life and emphasized the importance of maintaining cleanliness to reduce potential risks.<br><br>
+                Through this experience, we gained practical skills in microbiology, including sterile techniques, sample collection, and bacterial observation. This knowledge helps us better understand the presence of microorganisms in our daily lives and their role in both maintaining and challenging human health.
+            </div>
+        </div>
+        <div id="conclusion-message">Click anywhere to restart!</div>
+    </div>
+
+    <!-- Three.js will render here -->
+    <div id="three-container"></div>
+
+    <!-- 📌 Instructions Tablet (Always in the Corner) -->
+    <div class="tablet-container">
+        <div class="tablet-outline">
+            <div class="tablet">
+                <p class="instructions">Click Here to Start Experiment</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./main.js"></script> <!-- change file here -->
+
+</body>
+</html>
