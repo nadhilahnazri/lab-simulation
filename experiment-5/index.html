@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewSport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 3: Apple</title>
+	<link rel="stylesheet" href="./public/index.css">
+
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@v0.163.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@v0.163.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- Intro and conclusion -->
+    <div id="intro-overlay" class="overlay">
+        <div id="intro-container">
+            <img src="./public/2DLabAssistant.png" class="character" />
+            <div class="speech-bubble" id="speech-text">
+                <div style="text-align: center;"><b>Apple Browning Experiment</b></div>
+                <br>
+                Apple browning is a common phenomenon that occurs when the flesh of an apple is exposed to air. This process is called enzymatic browning,
+                which is caused by a reaction between oxygen and certain enzymes in the apple, primarily polyphenol oxidase (PPO). When an apple is cut or
+                bruised, the cell walls break, allowing oxygen to react with the PPO enzyme, leading to the production of brown-coloured compounds called melanin.
+                <br><br>
+                This experiment explores the factors that affect apple browning and investigates ways to slow it down. By testing different treatments such
+                as sugar, saltwater, or vinegar, we can determine which methods are most effective in preventing browning. Understanding this process is
+                important in food science, as it helps improve food preservation techniques and reduce waste.
+            </div>
+        </div>
+        <div id="intro-message">Scene loading...</div>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+      
+    <div id="conclusion-overlay" class="overlay">
+        <div id="conclusion-container">
+            <img src="./public/2DLabAssistant.png" class="character" />
+            <div class="speech-bubble" id="conclusion-speech-bubble">
+                <div style="text-align: center;"><b>CONCLUSION:</b></div>
+                <br><br>Overall, the experiment confirms that enzymatic browning is influenced by oxygen availability, pH levels, and temperature. These findings are useful for food preservation techniques, helping to keep fruits fresh for longer periods.
+            </div>
+        </div>
+        <div id="conclusion-message">Click anywhere to restart!</div>
+    </div>
+
+    <!-- Three.js will render here -->
+    <div id="three-container"></div>
+
+    <!-- 📌 Instructions Tablet (Always in the Corner) -->
+    <div class="tablet-container">
+        <div class="tablet-outline">
+            <div class="tablet">
+                <p class="instructions">Click Here to Start Experiment</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./main.js"></script> <!-- change file here -->
+
+</body>
+</html>
+
