@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment 3: Powder</title>
+	<link rel="stylesheet" href="./public/index.css">
+
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@v0.163.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@v0.163.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- Intro and conclusion -->
+    <div id="intro-overlay" class="overlay">
+        <div id="intro-container">
+            <img src="./public/2DLabAssistant.png" class="character" />
+            <div class="speech-bubble" id="speech-text">
+                <div style="text-align: center;"><b>Play Detective!</b></div>
+                <br>
+                Have you ever wondered how detectives can solve crimes?<br>One of the most important tools they use is fingerprinting.
+                <br><br>
+                Just like snowflakes, no two people have the same fingerprints. These unique patterns on our fingerprints can be left behind at crime scenes. providing crucial evidence.<br>
+                In this activity, we'll be exploring the world of forensic fingerprinting. We'll learn how to:<br><br>
+                1. <b>Collect fingerprints:</b> We'll use different methods to collect out own fingerprints.<br>
+                2. <b>Analyse fingerprints:</b> We'll examine our fingerprints closely and learn to identify different types of patterns.<br>
+                3. <b>Compare fingerprints:</b> We'll compare our fingerprints to each other and see how they differ.<br><br>
+                By the end of this activity, you'll have a better understanding of how forensic scientists use fingerprints to solve crimes. You might even become a future crime-solving expert!<br><br>
+                Are you ready to become a forensic scientist for a day? Let's get started!
+            </div>
+        </div>
+        <div id="intro-message">Scene loading...</div>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+    </div>
+      
+    <div id="conclusion-overlay" class="overlay">
+        <div id="conclusion-container">
+            <img src="./public/2DLabAssistant.png" class="character" />
+            <div class="speech-bubble" id="conclusion-speech-bubble">
+                <div style="text-align: center;"><b>CONCLUSION:</b></div>
+                <br><br>In this activity, we explored the unique world of fingerprints. We learned that fingerprints are unique to each individual and can be used to identify people.
+                We collected our own fingerprints and we can analyse them to identify different types of patterns like loops, whorls, and arches. By comparing our fingerprints, we
+                observed the incredible diversity and individuality of these unique patterns. This activity has demonstrated the importance of fingerprinting in forensic science and
+                how it can be used to solve crimes. We now have a better understanding of how detectives and forensic scientists utilise this valuable tool.
+            </div>
+        </div>
+        <div id="conclusion-message">Click anywhere to restart!</div>
+    </div>
+
+    <!-- Three.js will render here -->
+    <div id="three-container"></div>
+
+    <!-- 📌 Instructions Tablet (Always in the Corner) -->
+    <div class="tablet-container">
+        <div class="tablet-outline">
+            <div class="tablet">
+                <p class="instructions">Click Here to Start Experiment</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="./main.js"></script> <!-- change file here -->
+
+</body>
+</html>
+
