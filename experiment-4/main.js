@@ -543,8 +543,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0.5, 2.5, 4);
 controls.enableDamping = true; // smooth camera movement
 controls.enablePan = true;
-// remove and uncomment
-controls.enableRotate = true;
+
 if (!isSoftwareRenderer()) {
     controls.minDistance = 2; // min zoom
     controls.maxDistance = 4; // max zoom
