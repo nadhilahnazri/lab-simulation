@@ -353,15 +353,6 @@ function stepOne(onComplete) {
 }
 
 function stepTwo(onComplete) {
-    // Fade out the popupNotice
-    popupNotice.style.transition = 'opacity 0.5s ease-in-out';
-    popupNotice.style.opacity = 0;
-    setTimeout(() => {
-        if (popupNotice.parentNode) {
-            popupNotice.parentNode.removeChild(popupNotice); // Remove from DOM after fade-out
-        }
-    }, 500); // Match the duration of the fade-out animation
-    
     const spatulaStart = spatula.position.clone();
 
     const spatulaAbove = new THREE.Vector3(23, 13, -2);
@@ -501,6 +492,15 @@ function stepTwo(onComplete) {
 }
 
 function stepThree(onComplete) {
+    // Fade out the popupNotice
+    popupNotice.style.transition = 'opacity 0.5s ease-in-out';
+    popupNotice.style.opacity = 0;
+    setTimeout(() => {
+        if (popupNotice.parentNode) {
+            popupNotice.parentNode.removeChild(popupNotice); // Remove from DOM after fade-out
+        }
+    }, 500); // Match the duration of the fade-out animation
+    
     const duration = 500;
     const durationLong = 1000;
     const startTime = performance.now();
