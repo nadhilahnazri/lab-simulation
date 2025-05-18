@@ -612,7 +612,7 @@ function stepFour (onComplete) {
 const controls = new OrbitControls(camera, renderer.domElement);
 
 controls.enableDamping = true; // smooth camera movement
-controls.enablePan = true;
+controls.enablePan = false;
 if (!isSoftwareRenderer()) {
     controls.minDistance = 7; // min zoom
     controls.maxDistance = 10; // max zoom

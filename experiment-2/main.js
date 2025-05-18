@@ -764,7 +764,7 @@ function addLabel(text) {
 const controls = new OrbitControls(camera, renderer.domElement);
 
 controls.enableDamping = true; // smooth camera movement
-controls.enablePan = true;
+controls.enablePan = false;
 
 if (!isSoftwareRenderer()) {
     controls.minDistance = 7; // min zoom
