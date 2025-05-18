@@ -2,39 +2,37 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-// Text
-import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
 let popupNotice;
-let apparatus2;
-let procedure;
-let afterResult;
-let yeast;
-let yeastTube;
-let brownSugar;
-let sugarTube;
-let warmWater;
-let waterTube;
-let waterBubble;
-let boilingTube;
-let spatula;
-let rubberStopper;
-let rubberTube;
-let balloon;
-let filledBalloon;
-let balloonTube;
-let foam;
-var scoops;
 
+let apparatus5;
+let knife;
+let wholeApple;
+
+let slicedApple;
+let slice1;
+let slice2;
+let slice3;
+let slice4;
+
+let dunkedApple;
+let dunk1;
+let dunk2;
+let dunk3;
+
+let applePlate;
+let plateSalt;
+let plateSugar;
+let plateVinegar;
+let plateNone;
+let appleBrowned;
 
 let step = -1;
 const steps = [
-    "Step 1:\nAdd 2 teaspoons of brown sugar into the boiling tube.",
-    "Step 2:\nAdd 2 teaspoons of yeast into the same boiling tube.",
-    "Step 3:\nPour warm water and plug the boiling tube with rubber stopper. Shake well.",
-    "Step 4:\nStretch your balloon over top of the boiling tube. Leave it for 20-30 minutes.",
-    "Step 5:\nObserve the reaction and how the air released will fill up the balloon.",
+    "Step 1:\nCut the apple into 5 slices.",
+    "Step 2:\nOne slice acts as control. Each other slice is immersed into different prepared solutions for a few minutes.",
+    "Step 3:\nTake out the apple slices and observe the colour changes.",
+    "Which slice browned the fastest? Slowest? Did any of them turn brown really fast but then stayed the same colour by the end of 2 hours?",
     "END OF EXPERIMENT" // Empty string for the last step
 ];
 
@@ -117,8 +115,6 @@ function nextStep() {
         stepThree(() => { animateReady = true; });
     } else if (step === 3) {
         stepFour(() => { animateReady = true; });
-    } else if (step === 4) {
-        stepFive(() => { animateReady = true; });
     } else {
         resetAll(() => {
             animateReady = true;
@@ -168,16 +164,47 @@ function resetAll(onComplete) {
         instructions.innerText = "Click Here to Start Experiment";
         }
     );
-    brownSugar.visible = true;
-    brownSugar.material.transparent = true;
-    yeast.visible = true;
-    balloon.visible = true;
-    procedure.visible = false;
-    procedure.traverse((child) => {
+
+    // Fade out the popupNotice
+    popupNotice.style.transition = 'opacity 0.5s ease-in-out';
+    popupNotice.style.opacity = 0;
+    setTimeout(() => {
+        if (popupNotice.parentNode) {
+            popupNotice.parentNode.removeChild(popupNotice); // Remove from DOM after fade-out
+        }
+    }, 500); // Match the duration of the fade-out animation
+
+    // Reset positions
+    slice1.position.set(0, 0, 0);
+    slice2.position.set(0, 0, 0);
+    slice3.position.set(0, 0, 0);
+    slice4.position.set(0, 0, 0);
+    slice1.rotation.set(0, 0, 0);
+    slice2.rotation.set(0, 0, 0);
+    slice3.rotation.set(0, 0, 0);
+    slice4.rotation.set(0, 0, 0);
+
+    // Reset visibility
+    wholeApple.visible = true;
+
+    slicedApple.visible = false;
+    slicedApple.traverse((child) => {
         child.visible = false;
     });
-    afterResult.visible = false;
-    afterResult.traverse((child) => {
+    dunkedApple.visible = false;
+    dunkedApple.traverse((child) => {
+        child.visible = false;
+    });
+    applePlate.visible = false;
+    applePlate.traverse((child) => {
+        child.visible = false;
+        if (child.isMesh) {
+            child.material.opacity = 1; // Reset opacity for future use
+            child.material.transparent = false; // Disable transparency
+        }
+    });
+    appleBrowned.visible = false;
+    appleBrowned.traverse((child) => {
         child.visible = false;
     });
 
@@ -186,9 +213,125 @@ function resetAll(onComplete) {
 }
 
 function stepOne(onComplete) {
+    wholeApple.visible = true;
+    slicedApple.traverse(child => child.visible = false);
+
+    const knifeStart = knife.position.clone();
+    const knifeAbove = new THREE.Vector3(-52, 10, 48);
+    const knifeDown = new THREE.Vector3(-52, 10, 60);
+
+    const knifeRotationTarget = new THREE.Euler(0, THREE.MathUtils.degToRad(-90), 0);
+    const knifeRotationStart = knife.rotation.clone();
+
+    const durationShort = 500;
+    const durationMed = 1000;
+    const sliceCount = 4;
+    let currentSlice = 0;
+
+    // knife up
+    function knifeUp(startTime) {
+        function animate() {
+            const elapsedTime = performance.now() - startTime;
+            const t = Math.min(elapsedTime / durationMed, 1);
+
+            knife.position.lerpVectors(knifeStart, knifeAbove, t);
+            knife.rotation.set(
+                THREE.MathUtils.lerp(knifeRotationStart.x, knifeRotationTarget.x, t),
+                THREE.MathUtils.lerp(knifeRotationStart.y, knifeRotationTarget.y, t),
+                THREE.MathUtils.lerp(knifeRotationStart.z, knifeRotationTarget.z, t)
+            );
+
+            if (t < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                animateSlice(performance.now());
+            }
+        }
+        animate();
+    }
+
+    // start slicing
+    function animateSlice(startTime) {
+        function sliceDown(callback) {
+            const start = performance.now();
+            function animate() {
+                const elapsed = performance.now() - start;
+                const t = Math.min(elapsed / durationShort, 1);
+                knife.position.lerpVectors(knifeAbove, knifeDown, t);
+                if (t < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    setTimeout(() => callback(performance.now()), 200);
+                }
+            }
+            animate();
+        }
+
+        function sliceUp(callback) {
+            const start = performance.now();
+            function animate() {
+                const elapsed = performance.now() - start;
+                const t = Math.min(elapsed / durationShort, 1);
+                knife.position.lerpVectors(knifeDown, knifeAbove, t);
+                if (t < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    setTimeout(() => callback(), 100);
+                }
+            }
+            animate();
+        }
+
+        function performSlice() {
+            if (currentSlice < sliceCount) {
+                sliceDown(() => {
+                    sliceUp(() => {
+                        currentSlice++;
+                        performSlice();
+                    });
+                });
+            } else {
+                // Slicing complete
+                wholeApple.visible = false;
+                // Show slicedApple
+                slicedApple.traverse(child => child.visible = true);
+
+                // Return knife to original position
+                setTimeout(() => returnKnife(performance.now()), 100);
+            }
+        }
+        performSlice();
+    }
+
+    function returnKnife(startTime) {
+        function animate() {
+            const elapsed = performance.now() - startTime;
+            const t = Math.min(elapsed / durationShort, 1);
+
+            knife.position.lerpVectors(knifeAbove, knifeStart, t);
+            knife.rotation.set(
+                THREE.MathUtils.lerp(knifeRotationTarget.x, knifeRotationStart.x, t),
+                THREE.MathUtils.lerp(knifeRotationTarget.y, knifeRotationStart.y, t),
+                THREE.MathUtils.lerp(knifeRotationTarget.z, knifeRotationStart.z, t)
+            );
+
+            if (t < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                if (onComplete) onComplete();
+            }
+        }
+        animate();
+    }
+
+    // Start the first animation
+    knifeUp(performance.now());
+}
+
+function stepTwo(onComplete) {    
     // Add a pop-up notice
     popupNotice = document.createElement('div');
-    popupNotice.innerText = "    NOTE: If using other containers, ratio of yeast to brown sugar is in 1:1";
+    popupNotice.innerText = "NOTE: Solutions are prepared by mixing 1 tsp of each agent with ½ cup of water";
     popupNotice.style.position = 'absolute';
     popupNotice.style.top = '15%';
     popupNotice.style.left = '50%';
@@ -200,8 +343,12 @@ function stepOne(onComplete) {
     popupNotice.style.borderRadius = '8px';
     popupNotice.style.zIndex = '1000';
     popupNotice.style.textAlign = 'center';
-    popupNotice.style.display = 'none';
     popupNotice.style.display = 'block';
+    popupNotice.style.opacity = 0;
+    setTimeout(() => {
+        popupNotice.style.opacity = 1;
+    }, 50); // Small delay ensures it's rendered before transition
+    
 
     // Fade in the popupNotice
     popupNotice.style.opacity = 0;
@@ -211,148 +358,96 @@ function stepOne(onComplete) {
     }, 0);
     document.body.appendChild(popupNotice);
 
-    
-    procedure.visible = true; // Show procedure
-    
-    const spatulaStart = spatula.position.clone();
+    // START APPLE DUNKING
+    wholeApple.visible = false;
+    dunkedApple.visible = true;
+    applePlate.visible = true;
+    slicedApple.traverse(child => child.visible = true);
+    const duration = 1000;
 
-    const spatulaAbove = new THREE.Vector3(11.6, 13, -2);
-    const spatulaScoop = new THREE.Vector3(11.6, 5, -2);
-    const spatulaTube = new THREE.Vector3(53, 32, -1);
-
-    const spatulaRotationTarget = new THREE.Euler(THREE.MathUtils.degToRad(50), 0, 0); // Rotate 90 degrees
-    const spatulaRotationStart = spatula.rotation.clone();
-
-    const durationShort = 500;
-    const durationMed = 1000;
-    const startTime = performance.now();
-    scoops = 0;
-
-    // MOVE ABOVE DISH
-    function animateSpatulaToTarget(startTime) {
-        function animate() {
+    // REUSABLE FUNCTION
+    function dunkSlice(slice, above, dunk, rotTarget, onComplete) {
+        function moveAbove(startTime) {
             const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / durationShort, 1);
-
-            spatula.position.lerpVectors(spatulaStart, spatulaAbove, t);
-            spatula.rotation.set(
-                THREE.MathUtils.lerp(spatulaRotationStart.x, spatulaRotationTarget.x, t),
-                spatulaRotationStart.y,
-                spatulaRotationStart.z
+            const t = Math.min(elapsedTime / duration, 1);
+    
+            slice.position.lerpVectors(slice.position.clone(), above, t);
+            slice.rotation.set(
+                THREE.MathUtils.lerp(slice.rotation.clone().x, rotTarget.x, t),
+                THREE.MathUtils.lerp(slice.rotation.clone().y, rotTarget.y, t),
+                THREE.MathUtils.lerp(slice.rotation.clone().z, rotTarget.z, t)
             );
-
+    
             if (t < 1) {
-                requestAnimationFrame(animate);
+                requestAnimationFrame(() => moveAbove(startTime));
             } else {
-                // When done, return spatula to start position
-                setTimeout(() => {
-                    animateScoop(performance.now());
-                }, 500);
+                setTimeout(() => moveDown(performance.now()), 200);
             }
         }
-        animate();
-    }
-
-    // SCOOP BROWN SUGAR
-    function animateScoop(startTime) {
-        function animate() {
-            const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / durationShort, 1);
-
-            spatula.position.lerpVectors(spatulaAbove, spatulaScoop, t);
-
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                // When done, move to tube
-                setTimeout(() => {
-                    if (scoops < 1) {
-                        brownSugar.scale.set(1, 0.7, 1);
-                    }
-                    else {
-                        brownSugar.visible = false; // Hide brown sugar after scooping
-                    }
-                    animateTube(performance.now());
-                }, 200);
-            }
-        }
-        animate();
-    }
-
-    // MOVE TO TUBE
-    function animateTube(startTime) {
-        function animate() {
-            const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / durationMed, 1);
-
-            spatula.position.lerpVectors(spatulaScoop, spatulaTube, t);
-
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                scoops += 1; // Increment scoops
-                if (scoops < 2) {
-                    sugarTube.visible = true;
-                    sugarTube.scale.set(1, 0.5, 1); // Scale up brown sugar in tube
-                    // If not done scooping, return to scoop position
-                    setTimeout(() => {
-                        animateSecondScoop(performance.now());
-                    }, 200);
-                } else {
-                    // When done, return spatula to start position
-                    sugarTube.scale.set(1, 1, 1); // Scale up brown sugar in tube
-                    setTimeout(() => {
-                        animateSpatulaBack(performance.now());
-                    }, 200);
+    
+        function moveDown(startTimeDown) {
+            function animateDown() {
+                const elapsedTime = performance.now() - startTimeDown;
+                const t = Math.min(elapsedTime / duration, 1);
+    
+                slice.position.lerpVectors(above, dunk, t);
+    
+                if (t < 1) {
+                    requestAnimationFrame(animateDown);
+                } else if (onComplete) {
+                    onComplete();
                 }
             }
+            animateDown();
         }
-        animate();
+    
+        moveAbove(performance.now());
     }
 
-    // SCOOP AGAIN
-    function animateSecondScoop(startTime) {
-        function animate() {
-            const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / durationMed, 1);
-            spatula.position.lerpVectors(spatulaTube, spatulaAbove, t);
+    const dunkRotationTarget = new THREE.Euler(THREE.MathUtils.degToRad(90), 0, 0);
 
-
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                animateScoop(performance.now());
+    // slices 2:salt, 3:sugar, 1:vinegar, 4:none
+    // salt
+    dunkSlice(slice2, new THREE.Vector3(23.5, -4, -10), new THREE.Vector3(23.5, -4, 6), dunkRotationTarget, () => {
+        // repeat
+        slice2.visible = false;
+        if (dunk3) {
+            dunk3.traverse(child => {
+                child.visible = true;
+            });
+        }
+        // sugar
+        dunkSlice(slice3, new THREE.Vector3(46, -4, -10), new THREE.Vector3(46, -4, 5.5), dunkRotationTarget, () => {
+            slice3.visible = false;
+            if (dunk2) {
+                dunk2.traverse(child => {
+                    child.visible = true;
+                });
             }
-        }
-        animate();
-    }
-
-    function animateSpatulaBack(startTime) {
-        function animate() {
-            const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / durationMed, 1);
-
-            spatula.rotation.set(
-                THREE.MathUtils.lerp(spatulaRotationTarget.x, spatulaRotationStart.x, t),
-                spatulaRotationStart.y,
-                spatulaRotationStart.z
-            );
-            spatula.position.lerpVectors(spatulaTube, spatulaStart, t);
-
-
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                if (onComplete) onComplete();
-            }
-        }
-        animate();
-    }
-    // Start the first animation (spatula moves first)
-    animateSpatulaToTarget(performance.now());
+            // vinegar
+            dunkSlice(slice1, new THREE.Vector3(48.3, -3.9, -20), new THREE.Vector3(48.3, -3.9, -6), dunkRotationTarget, () => {
+                slice1.visible = false;
+                if (dunk1) {
+                    dunk1.traverse(child => {
+                        child.visible = true;
+                    });
+                }
+                // no liquid
+                dunkSlice(slice4, new THREE.Vector3(90, 23, -10), new THREE.Vector3(90, 23, 0), new THREE.Euler(0, 0, THREE.MathUtils.degToRad(40)), () => {
+                    slice4.visible = false;
+                    if (plateNone) {
+                        plateNone.traverse(child => {
+                            child.visible = true;
+                        });
+                    }
+                    if (onComplete) onComplete();
+                });
+            });
+        });
+    });
 }
 
-function stepTwo(onComplete) {
+function stepThree(onComplete) {
     // Fade out the popupNotice
     popupNotice.style.transition = 'opacity 0.5s ease-in-out';
     popupNotice.style.opacity = 0;
@@ -361,403 +456,156 @@ function stepTwo(onComplete) {
             popupNotice.parentNode.removeChild(popupNotice); // Remove from DOM after fade-out
         }
     }, 500); // Match the duration of the fade-out animation
+
+    // apple visibility
+    dunkedApple.visible = false;
+    dunkedApple.traverse(child => { child.visible = false; });
+    slice1.visible = true;
+    slice2.visible = true;
+    slice3.visible = true;
+
+    const duration = 1000;
+    const newRotTarget = new THREE.Euler(0, 0, THREE.MathUtils.degToRad(40));
+
+    // REUSABLE FUNCTION
+    function takeOut(slice, out, place, rotTarget, onComplete) {
+        function moveAbove(startTime) {
+            const elapsedTime = performance.now() - startTime;
+            const t = Math.min(elapsedTime / duration, 1);
     
-    const spatulaStart = spatula.position.clone();
-
-    const spatulaAbove = new THREE.Vector3(23, 13, -2);
-    const spatulaScoop = new THREE.Vector3(23, 5, -2);
-    const spatulaTube = new THREE.Vector3(53, 32, -1);
-
-    const spatulaRotationTarget = new THREE.Euler(THREE.MathUtils.degToRad(50), 0, 0); // Rotate 90 degrees
-    const spatulaRotationStart = spatula.rotation.clone();
-
-    const durationShort = 500;
-    const durationMed = 1000;
-    const startTime = performance.now();
-    scoops = 0;
-
-    // MOVE ABOVE DISH
-    function animateSpatulaToTarget(startTime) {
-        function animate() {
-            const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / durationShort, 1);
-
-            spatula.position.lerpVectors(spatulaStart, spatulaAbove, t);
-            spatula.rotation.set(
-                THREE.MathUtils.lerp(spatulaRotationStart.x, spatulaRotationTarget.x, t),
-                spatulaRotationStart.y,
-                spatulaRotationStart.z
+            slice.position.lerpVectors(slice.position.clone(), out, t);
+            slice.rotation.set(
+                THREE.MathUtils.lerp(slice.rotation.clone().x, rotTarget.x, t),
+                THREE.MathUtils.lerp(slice.rotation.clone().y, rotTarget.y, t),
+                THREE.MathUtils.lerp(slice.rotation.clone().z, rotTarget.z, t)
             );
-
+    
             if (t < 1) {
-                requestAnimationFrame(animate);
+                requestAnimationFrame(() => moveAbove(startTime));
             } else {
-                // When done, return spatula to start position
-                setTimeout(() => {
-                    animateScoop(performance.now());
-                }, 500);
+                setTimeout(() => moveDown(performance.now()), 200);
             }
         }
-        animate();
-    }
-
-    // SCOOP YEAST
-    function animateScoop(startTime) {
-        function animate() {
-            const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / durationShort, 1);
-
-            spatula.position.lerpVectors(spatulaAbove, spatulaScoop, t);
-
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                // When done, move to tube
-                setTimeout(() => {
-                    if (scoops < 1) {
-                        yeast.scale.set(1, 0.7, 1);
-                    }
-                    else {
-                        yeast.visible = false; // Hide brown sugar after scooping
-                    }
-                    animateTube(performance.now());
-                }, 200);
-            }
-        }
-        animate();
-    }
-
-    // MOVE TO TUBE
-    function animateTube(startTime) {
-        function animate() {
-            const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / durationMed, 1);
-
-            spatula.position.lerpVectors(spatulaScoop, spatulaTube, t);
-
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                scoops += 1; // Increment scoops
-                if (scoops < 2) {
-                    yeastTube.visible = true;
-                    yeastTube.scale.set(1, 0.8, 1); // Scale up yeast in tube
-                    // If not done scooping, return to scoop position
-                    setTimeout(() => {
-                        animateSecondScoop(performance.now());
-                    }, 200);
-                } else {
-                    // When done, return spatula to start position
-                    yeastTube.scale.set(1, 1, 1);
-                    setTimeout(() => {
-                        animateSpatulaBack(performance.now());
-                    }, 200);
+    
+        function moveDown(startTimeDown) {
+            function animateDown() {
+                const elapsedTime = performance.now() - startTimeDown;
+                const t = Math.min(elapsedTime / duration, 1);
+    
+                slice.position.lerpVectors(out, place, t);
+    
+                if (t < 1) {
+                    requestAnimationFrame(animateDown);
+                } else if (onComplete) {
+                    onComplete();
                 }
             }
+            animateDown();
         }
-        animate();
+    
+        moveAbove(performance.now());
     }
 
-    // SCOOP AGAIN
-    function animateSecondScoop(startTime) {
-        function animate() {
-            const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / durationMed, 1);
-            spatula.position.lerpVectors(spatulaTube, spatulaAbove, t);
-
-
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                animateScoop(performance.now());
+    // slices 2:salt, 3:sugar, 1:vinegar
+    takeOut(slice2, new THREE.Vector3(4.5, 41, -15), new THREE.Vector3(80, 50, 0), newRotTarget, () => {
+        slice2.visible = false;
+        if (plateSalt) {
+            plateSalt.traverse(child => {
+                child.visible = true;
+            });
+        }
+        takeOut(slice3, new THREE.Vector3(25, 44, -15), new THREE.Vector3(66.5, 52, 0), newRotTarget, () => {
+            slice3.visible = false;
+            if (plateSugar) {
+                plateSugar.traverse(child => {
+                    child.visible = true;
+                });
             }
-        }
-        animate();
-    }
+            takeOut(slice1, new THREE.Vector3(38, 28, -15), new THREE.Vector3(65, 19, 0), newRotTarget, () => {
+                slice1.visible = false;
+                if (plateVinegar) {
+                    plateVinegar.traverse(child => {
+                        child.visible = true;
+                    });
+                }
+                if(onComplete) onComplete();
+            });
+        });
+    });
 
-    function animateSpatulaBack(startTime) {
-        function animate() {
-            const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / durationMed, 1);
-
-            spatula.rotation.set(
-                THREE.MathUtils.lerp(spatulaRotationTarget.x, spatulaRotationStart.x, t),
-                spatulaRotationStart.y,
-                spatulaRotationStart.z
-            );
-            spatula.position.lerpVectors(spatulaTube, spatulaStart, t);
-
-
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                if (onComplete) onComplete();
-            }
-        }
-        animate();
-    }
-    // Start the first animation (spatula moves first)
-    animateSpatulaToTarget(performance.now());
 }
 
-function stepThree(onComplete) {
-    const duration = 500;
-    const durationLong = 1000;
-    const startTime = performance.now();
-    procedure.visible = true;
-
-    // Water beaker movement & rotation
-    const waterTarget = new THREE.Vector3(5, 35, 0);
-    //const waterTarget = new THREE.Vector3(0, 1, 0);
-    const waterStart = warmWater.position.clone();
-    const waterRotationTarget = new THREE.Euler(0, 0, -THREE.MathUtils.degToRad(37));
-    const waterRotationStart = warmWater.rotation.clone();
-
-    // Water in boiling tube
-    waterTube.visible = true;
-    const waterTubeStart = new THREE.Vector3(1, 0, 1);
-    const waterTubeTarget = new THREE.Vector3(1, 1, 1);
-
-    // 1. Pour warm water
-    function pourWater(startTime) {
-        function animate() {
-            const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / duration, 1); // Normalize [0, 1]
-
-            // Pour
-            warmWater.position.lerpVectors(waterStart, waterTarget, t);
-            warmWater.rotation.set(
-                warmWater.rotation.x,
-                warmWater.rotation.y,
-                THREE.MathUtils.lerp(waterRotationStart.z, waterRotationTarget.z, t)
-            );
-
-            // Scale up water in tube
-            waterTube.scale.lerpVectors(waterTubeStart, waterTubeTarget, t);
-
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                setTimeout(() => {
-                    returnWater(performance.now());
-                }, 500); // Wait before returning
-            }
-        }
-        animate();
-    }
-
-    // 2. return water
-    function returnWater(startTime) {
-        function animate() {
-            const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / duration, 1); // Normalize [0, 1]
-    
-            // Return
-            warmWater.position.lerpVectors(waterTarget, waterStart, t);
-            warmWater.rotation.set(
-                    THREE.MathUtils.lerp(waterRotationTarget.x, waterRotationStart.x, t),
-                    THREE.MathUtils.lerp(waterRotationTarget.y, waterRotationStart.y, t),
-                    THREE.MathUtils.lerp(waterRotationTarget.z, waterRotationStart.z, t)
-            );
-
-            // Add a pop-up notice
-            popupNotice.innerText = "    NOTE: If using bottles, you may use the bottle cap";
-            popupNotice.style.position = 'absolute';
-            popupNotice.style.top = '15%';
-            popupNotice.style.left = '50%';
-            popupNotice.style.transform = 'translate(-50%, -50%)';
-            popupNotice.style.padding = '20px';
-            popupNotice.style.background = 'rgba(0, 0, 0, 0.8)';
-            popupNotice.style.color = 'white';
-            popupNotice.style.fontSize = '16px';
-            popupNotice.style.borderRadius = '8px';
-            popupNotice.style.zIndex = '1000';
-            popupNotice.style.textAlign = 'center';
-            popupNotice.style.display = 'none';
-            popupNotice.style.display = 'block';
-
-            // Fade in the popupNotice
-            popupNotice.style.opacity = 0;
-            popupNotice.style.transition = 'opacity 0.5s ease-in-out';
-            setTimeout(() => {
-                popupNotice.style.opacity = 1;
-            }, 0);
-
-            
-    
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                plugStopper(performance.now());
-            }
-        }
-        animate();
-    }
-
-    const plugTarget = new THREE.Vector3(5.6, 23, -11.7);
-    const plugStart = rubberStopper.position.clone();
-
-    // 3. Plug stopper
-    function plugStopper(startTime){
-        function animate() {
-            document.body.appendChild(popupNotice);
-            const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / duration, 1); // Normalize [0, 1]
-
-            rubberStopper.position.lerpVectors(plugStart, plugTarget, t);
-
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                rubberTube.visible = true;
-                rubberStopper.visible = false;
-                shakeTube(performance.now());
-            }
-        }
-        animate();
-    }
-
-    // 4. Shake tube
-    function shakeTube(startTime) {
-        function animate() {
-            const elapsedTime = performance.now() - startTime;
-            const t = Math.min(elapsedTime / durationLong, 1); // Normalize [0, 1]
-
-            // Shake the tube
-            boilingTube.rotation.x = Math.sin(t * Math.PI * 10) * 0.2;
-            boilingTube.rotation.y = Math.sin(t * Math.PI * 10) * 0.2;
-            procedure.rotation.x = Math.sin(t * Math.PI * 10) * 0.2;
-            procedure.rotation.y = Math.sin(t * Math.PI * 10) * 0.2;
-            waterBubble.rotation.x = Math.sin(t * Math.PI * 10) * 0.2;
-            waterBubble.rotation.y = Math.sin(t * Math.PI * 10) * 0.2;
-
-            // Show shaken result
-            afterResult.visible = true;
-            waterBubble.visible = true;
-
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            } else {
-                waterTube.visible = false;
-                yeastTube.visible = false;
-                sugarTube.visible = false;
-                if (onComplete) onComplete();
-            }
-
-        }
-        animate();
-    }
-
-    // Start
-    pourWater(performance.now());
-}
-
-function stepFour(onComplete) {
-    popupNotice.style.transition = 'opacity 0.5s ease-in-out';
+function stepFour (onComplete) {
+    // Add a pop-up notice
+    popupNotice = document.createElement('div');
+    popupNotice.innerText = "RESULTS: \n1. No liquid (exposed to air) - turns brown the fastest \n2. Salt - browning was delayed compared to control. Light discolouration appeared after a longer period \n3. Sugar - browning was also delayed but not as effectively as salt. The sugar-coated apple retained some freshness but showed slight browning after some time \n4. Vinegar - minimal to no browning. The apple stayed fresh for a much longer period";
+    popupNotice.style.position = 'absolute';
+    popupNotice.style.top = '15%';
+    popupNotice.style.left = '50%';
+    popupNotice.style.transform = 'translate(-50%, -50%)';
+    popupNotice.style.padding = '20px';
+    popupNotice.style.background = 'rgba(255, 255, 255, 0.8)';
+    popupNotice.style.color = 'black';
+    popupNotice.style.fontSize = 'clamp(8px, 2vw, 24px)';
+    popupNotice.style.borderRadius = '8px';
+    popupNotice.style.zIndex = '1000';
+    popupNotice.style.textAlign = 'justify';
+    popupNotice.style.display = 'block';
     popupNotice.style.opacity = 0;
     setTimeout(() => {
-        if (popupNotice.parentNode) {
-            popupNotice.parentNode.removeChild(popupNotice); // Remove from DOM after fade-out
-        }
-    }, 500); // Match the duration of the fade-out animation
+        popupNotice.style.opacity = 1;
+    }, 50); // Small delay ensures it's rendered before transition
+    
 
-    const duration = 1000; // Duration of the animation in milliseconds
+    // Fade in the popupNotice
+    popupNotice.style.opacity = 0;
+    popupNotice.style.transition = 'opacity 0.5s ease-in-out';
+    setTimeout(() => {
+        popupNotice.style.opacity = 1;
+    }, 0);
+    document.body.appendChild(popupNotice);
+    
+    const fadeDuration = 1000; // in ms
     const startTime = performance.now();
     
-    const targetPosition = new THREE.Vector3(0, 0, 0);
-    const rubberStopperStart = rubberStopper.position.clone();
-
-    const balloonStart = balloon.position.clone();
-    const balloonTarget = new THREE.Vector3(-10, 25, -5);
-
-    function animate() {
-        const elapsedTime = performance.now() - startTime;
-        const t = Math.min(elapsedTime / duration, 1); // Normalize time to [0, 1]
-
-        // take off rubber
-        rubberStopper.visible = true;
-        rubberTube.visible = false;
-        rubberStopper.position.lerpVectors(rubberStopperStart, targetPosition, t);
-        balloon.position.lerpVectors(balloonStart, balloonTarget, t);        
-
-
-        if (t < 1) {
-            requestAnimationFrame(animate);
-        } else {
-            procedure.visible = true;
-            balloonTube.visible = true;
-            balloon.visible = false;
-            if (onComplete) onComplete(); // Animation complete, allow nextStep
+    // Ensure both apples are visible and transparent is enabled
+    applePlate.visible = true;
+    applePlate.traverse(child => {
+        child.visible = true;
+        if (child.isMesh) {
+            child.material.transparent = true; // Enable transparency
+            child.material.opacity = 1; // Start fully visible
         }
-    }
-    animate();
-}
-
-function stepFive(onComplete) {
-    const duration = 1000;
-    const startTime = performance.now();
+    });
+    appleBrowned.visible = true;
+    appleBrowned.traverse(child => {
+        child.visible = true;
+    });
     
-    const balloonTarget = new THREE.Vector3(0, 0, 0);
-    const balloonStart = balloon.position.clone();
-    const foamStart = new THREE.Vector3(1, 0, 1);
-    const foamTarget = new THREE.Vector3(1, 1, 1);
-
-    filledBalloon.visible = true;
-    afterResult.visible = true;
-    foam.visible = true;
-
-    // balloon
-    const initialScale = 0.5;
-    const finalScale = 1;
-    filledBalloon.scale.set(initialScale, initialScale, initialScale);
-
-    function animate() {
+    function fadeApples() {
         const elapsedTime = performance.now() - startTime;
-        const t = Math.min(elapsedTime / duration, 1);
+        const t = Math.min(elapsedTime / fadeDuration, 1);
 
-        // secretly return balloon while invisible
-        balloon.position.lerpVectors(balloonStart, balloonTarget, t);
-
-        // balloon
-        const scaleValue = THREE.MathUtils.lerp(initialScale, finalScale, t);
-        filledBalloon.scale.set(scaleValue, scaleValue, scaleValue);
-        // Adjust position to keep it visually centered while scaling
-        const offsetX = (finalScale - scaleValue) * 36;
-        const offsetY = (finalScale - scaleValue) * 25;
-        filledBalloon.position.set(offsetX, offsetY, 0);
-
-        balloonTube.visible = false;
-
-        // foam
-        foam.scale.lerpVectors(foamStart, foamTarget, t);
-
+        applePlate.traverse(child => {
+            if (child.isMesh) {
+                child.material.opacity = 1 - t;
+            }
+        });
+        
         if (t < 1) {
-            requestAnimationFrame(animate);
+            requestAnimationFrame(fadeApples);
         } else {
+            // Hide the old apple completely after fade
+            applePlate.visible = false;
+            applePlate.traverse(child => {
+                if (child.isMesh) {
+                    child.material.opacity = 1; // reset for future use
+                }
+            });
             if (onComplete) onComplete();
         }
     }
-    animate();
-}
-
-const fontLoader = new FontLoader();
-function addLabel(text) {
-    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-        const textGeometry = new TextGeometry(text, {
-            font: font,
-            size: 0.2,
-            depth: 0.1
-        })
-
-        const textMesh = new THREE.Mesh(textGeometry, [
-            new THREE.MeshPhongMaterial({ color: 0xffffff }), // front
-            new THREE.MeshPhongMaterial({ color: 0x000000 }) // side
-        ])
-
-        textMesh.castShadow = true;
-        textMesh.position.set(-1.65, 2.8, 3.5);
-        scene.add(textMesh);
-    });
+    fadeApples();    
 }
 
 // Add controls
@@ -765,8 +613,6 @@ const controls = new OrbitControls(camera, renderer.domElement);
 
 controls.enableDamping = true; // smooth camera movement
 controls.enablePan = true;
-// remove and uncomment
-controls.enableRotate = true;
 if (!isSoftwareRenderer()) {
     controls.minDistance = 7; // min zoom
     controls.maxDistance = 10; // max zoom
@@ -853,60 +699,62 @@ gltfLoader.load('./public/3D_Lab.gltf', function(gltf){
     console.error('Error loading model: ', error);
 });
 
-// ********** Experiment 2 **********
+// ********** Experiment 5 **********
 const dracoLoader = new DRACOLoader();
 dracoLoader.setDecoderPath('https://unpkg.com/three@0.163.0/examples/jsm/libs/draco/');
 gltfLoader.setDRACOLoader(dracoLoader);
 gltfLoader.load('./public/3D_Expt5_WithoutLight.gltf', function(gltf){
-    apparatus2 = gltf.scene;
-    scene.add(apparatus2);
-    apparatus2.scale.set(0.05, 0.05, 0.05); // Scale up model
-    apparatus2.position.set(-0.8, 2.5, 4);
+    apparatus5 = gltf.scene;
+    scene.add(apparatus5);
+    apparatus5.scale.set(3, 3, 3); // Scale up model
+    apparatus5.position.set(0.1, 2.47, 4);
 
     // Apparatus names
-    yeast = scene.getObjectByName('YEAST');
-    brownSugar = scene.getObjectByName('BROWNSUGAR1');
-    boilingTube = scene.getObjectByName('BOILINGTUBE');
-    spatula = scene.getObjectByName('SPATULA');
-    rubberStopper = scene.getObjectByName('RUBBERSTOPPER');
-    rubberTube = scene.getObjectByName('RUBBERSTOPPER_TUBE');
-    sugarTube = scene.getObjectByName('BROWNSUGARTUBE');
-    yeastTube = scene.getObjectByName('YEAST_TUBE');
-    warmWater = scene.getObjectByName('WARMWATER');
-    waterTube = scene.getObjectByName('WATER_TUBE');
-    waterBubble = scene.getObjectByName('WATER_BUBBLE1');
-    balloon = scene.getObjectByName('FLATBALLOON');
-    filledBalloon = scene.getObjectByName('FILLEDBALLOON');
-    foam = scene.getObjectByName('FOAM');
-    balloonTube = scene.getObjectByName('UNINFLATEDBALLOON');
-    
+    knife = scene.getObjectByName('KNIFE');
+    wholeApple = scene.getObjectByName('APPLEWHOLE');
+    slicedApple = scene.getObjectByName('APPLESLICES');
+    slice1 = scene.getObjectByName('SLICEDAPPLE1');
+    slice2 = scene.getObjectByName('SLICEDAPPLE2');
+    slice3 = scene.getObjectByName('SLICEDAPPLE3');
+    slice4 = scene.getObjectByName('SLICEDAPPLE4');
 
-    procedure = scene.getObjectByName('PROCEDURE');
-    afterResult = scene.getObjectByName('AFTERRESULT');
+    dunkedApple = scene.getObjectByName('APPLESLICES_INSOLUTION');
+    dunk1 = scene.getObjectByName('SLICEDAPPLE_INSOLUTION1');
+    dunk2 = scene.getObjectByName('SLICEDAPPLE_INSOLUTION2');
+    dunk3 = scene.getObjectByName('SLICEDAPPLE_INSOLUTION3');
 
-    if (procedure) {
-        procedure.traverse((child) => {
+    applePlate = scene.getObjectByName('APPLESLICES_ONPLATE');
+    plateSalt = scene.getObjectByName('APPLESLICES_ONPLATE_SALT');
+    plateSugar = scene.getObjectByName('APPLESLICES_ONPLATE_SUGAR');
+    plateVinegar = scene.getObjectByName('APPLESLICES_ONPLATE_VINEGAR');
+    plateNone = scene.getObjectByName('APPLESLICES_ONPLATE_NOLIQUID');
+
+    appleBrowned = scene.getObjectByName('APPLESLICES_ONPLATE_BROWNED');
+
+    if (slicedApple) {
+        slicedApple.traverse((child) => {
             child.visible = false;
         });
     }
-    if (afterResult) {
-        afterResult.traverse((child) => {
+    if (dunkedApple) {
+        dunkedApple.traverse((child) => {
             child.visible = false;
         });
     }
-
-    // if (elodeasps) {
-    //     // Add label above Elodea sp.
-    //     addLabel('Elodea sp.');
-    // }
-    // if (scene.getObjectByName('MICROSCOPE')) {
-    //     scene.getObjectByName('MICROSCOPE').visible = false; // Hide the object
-    // }
-
+    if (applePlate) {
+        applePlate.traverse((child) => {
+            child.visible = false;
+        });
+    }
+    if (appleBrowned) {
+        appleBrowned.traverse((child) => {
+            child.visible = false;
+        });
+    }
     
-    console.log('Expt2 loaded');
+    console.log('Expt5 loaded');
 }, undefined, function(error){
-    console.error('Error loading Expt2: ', error);
+    console.error('Error loading Expt5: ', error);
 });
 
 
@@ -935,7 +783,7 @@ function resizeTablet() {
     let fontSize = Math.max(height * 0.12, 14); // Default font size based on height
     if (textLength > 50) fontSize *= 0.85; // Reduce if text is long
     if (textLength > 80) fontSize *= 0.7;
-    if (textLength > 120) fontSize *= 0.6;
+    if (textLength > 140) fontSize *= 0.6;
 
     instructions.style.fontSize = `${fontSize}px`;
 }
