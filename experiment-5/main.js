@@ -14,6 +14,7 @@ let slice1;
 let slice2;
 let slice3;
 let slice4;
+let slice5;
 
 let dunkedApple;
 let dunk1;
@@ -29,7 +30,7 @@ let appleBrowned;
 
 let step = -1;
 const steps = [
-    "Step 1:\nCut the apple into 5 slices.",
+    "Step 1:\nCut the apple into 4 slices.",
     "Step 2:\nOne slice acts as control. Each other slice is immersed into different prepared solutions for a few minutes.",
     "Step 3:\nTake out the apple slices and observe the colour changes.",
     "Which slice browned the fastest? Slowest? Did any of them turn brown really fast but then stayed the same colour by the end of 2 hours?",
@@ -52,6 +53,7 @@ loadingManager.onLoad = () => {
     progressBar.style.width = '100%';
 
     introOverlay.addEventListener('click', () => {
+        clickSound.play(); // Play click sound
         introOverlay.classList.add('fade-out');
         setTimeout(() => {
             introOverlay.style.display = 'none';
@@ -63,9 +65,31 @@ loadingManager.onLoad = () => {
 const scene = new THREE.Scene();
 
 
-// Create camera
+// Create camera & listener
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000); // (fov, aspect, near, far):
 camera.position.set(0, 5, 10);
+
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+
+// Create audio loader for sound effects
+const audioloader = new THREE.AudioLoader();
+
+const backgroundSound = new THREE.Audio(listener);
+audioloader.load('./public/Education.mp3', function(buffer) {
+    backgroundSound.setBuffer(buffer);
+    backgroundSound.setLoop(true); // loop when done
+    backgroundSound.setVolume(0.4);
+    backgroundSound.play();
+});
+
+const clickSound = new THREE.Audio(listener);
+audioloader.load('./public/MouseClick.mp3', function(buffer) {
+    clickSound.setBuffer(buffer);
+    clickSound.setLoop(false);
+    clickSound.setVolume(1.0);
+});
 
 
 // Create renderer
@@ -92,6 +116,8 @@ let animateReady = true; // Controls when nextStep can be triggered
 
 function nextStep() {
     if (!animateReady) return; // Prevent multiple clicks while animating
+
+    clickSound.play(); // Play click sound
 
     step++;
     if (step >= steps.length) step = 0; // Restart at the beginning
@@ -143,6 +169,7 @@ function showConclusionOverlay(onClick) {
 
     // Click to trigger the next step
     overlay.addEventListener('click', function handleClick() {
+        clickSound.play(); // Play click sound
         overlay.animate([{ opacity: 1 }, { opacity: 0 }], {
             duration: 500,
             fill: 'forwards'
@@ -225,7 +252,7 @@ function stepOne(onComplete) {
 
     const durationShort = 500;
     const durationMed = 1000;
-    const sliceCount = 4;
+    const sliceCount = 3;
     let currentSlice = 0;
 
     // knife up
@@ -295,6 +322,7 @@ function stepOne(onComplete) {
                 wholeApple.visible = false;
                 // Show slicedApple
                 slicedApple.traverse(child => child.visible = true);
+                slice5.visible = false;
 
                 // Return knife to original position
                 setTimeout(() => returnKnife(performance.now()), 100);
@@ -339,7 +367,7 @@ function stepTwo(onComplete) {
     popupNotice.style.padding = '20px';
     popupNotice.style.background = 'rgba(0, 0, 0, 0.8)';
     popupNotice.style.color = 'white';
-    popupNotice.style.fontSize = '16px';
+    popupNotice.style.fontSize = 'clamp(8px, 16px, 24px)';
     popupNotice.style.borderRadius = '8px';
     popupNotice.style.zIndex = '1000';
     popupNotice.style.textAlign = 'center';
@@ -363,6 +391,7 @@ function stepTwo(onComplete) {
     dunkedApple.visible = true;
     applePlate.visible = true;
     slicedApple.traverse(child => child.visible = true);
+    slice5.visible = false;
     const duration = 1000;
 
     // REUSABLE FUNCTION
@@ -546,7 +575,7 @@ function stepFour (onComplete) {
     popupNotice.style.padding = '20px';
     popupNotice.style.background = 'rgba(255, 255, 255, 0.8)';
     popupNotice.style.color = 'black';
-    popupNotice.style.fontSize = 'clamp(8px, 2vw, 24px)';
+    popupNotice.style.fontSize = 'clamp(8px, 16px, 24px)';
     popupNotice.style.borderRadius = '8px';
     popupNotice.style.zIndex = '1000';
     popupNotice.style.textAlign = 'justify';
@@ -717,6 +746,7 @@ gltfLoader.load('./public/3D_Expt5_WithoutLight.gltf', function(gltf){
     slice2 = scene.getObjectByName('SLICEDAPPLE2');
     slice3 = scene.getObjectByName('SLICEDAPPLE3');
     slice4 = scene.getObjectByName('SLICEDAPPLE4');
+    slice5 = scene.getObjectByName('SLICEDAPPLE5');
 
     dunkedApple = scene.getObjectByName('APPLESLICES_INSOLUTION');
     dunk1 = scene.getObjectByName('SLICEDAPPLE_INSOLUTION1');

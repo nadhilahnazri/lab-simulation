@@ -40,6 +40,7 @@ loadingManager.onLoad = () => {
     progressBar.style.width = '100%';
 
     introOverlay.addEventListener('click', () => {
+        clickSound.play(); // Play click sound
         introOverlay.classList.add('fade-out');
         setTimeout(() => {
             introOverlay.style.display = 'none';
@@ -51,9 +52,31 @@ loadingManager.onLoad = () => {
 const scene = new THREE.Scene();
 
 
-// Create camera
+// Create camera & listener
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000); // (fov, aspect, near, far):
 camera.position.set(0, 5, 10);
+
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+
+// Create audio loader for sound effects
+const audioloader = new THREE.AudioLoader();
+
+const backgroundSound = new THREE.Audio(listener);
+audioloader.load('./public/Education.mp3', function(buffer) {
+    backgroundSound.setBuffer(buffer);
+    backgroundSound.setLoop(true); // loop when done
+    backgroundSound.setVolume(0.4);
+    backgroundSound.play();
+});
+
+const clickSound = new THREE.Audio(listener);
+audioloader.load('./public/MouseClick.mp3', function(buffer) {
+    clickSound.setBuffer(buffer);
+    clickSound.setLoop(false);
+    clickSound.setVolume(1.0);
+});
 
 
 // Create renderer
@@ -80,6 +103,8 @@ let animateReady = true; // Controls when nextStep can be triggered
 
 function nextStep() {
     if (!animateReady) return; // Prevent multiple clicks while animating
+
+    clickSound.play(); // Play click sound
 
     step++;
     if (step >= steps.length) step = 0; // Restart at the beginning

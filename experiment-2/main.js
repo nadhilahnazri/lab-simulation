@@ -2,9 +2,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
-// Text
-import { FontLoader } from 'three/addons/loaders/FontLoader.js';
-import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 
 let popupNotice;
 let apparatus2;
@@ -54,6 +51,7 @@ loadingManager.onLoad = () => {
     progressBar.style.width = '100%';
 
     introOverlay.addEventListener('click', () => {
+        clickSound.play(); // Play click sound
         introOverlay.classList.add('fade-out');
         setTimeout(() => {
             introOverlay.style.display = 'none';
@@ -65,9 +63,31 @@ loadingManager.onLoad = () => {
 const scene = new THREE.Scene();
 
 
-// Create camera
+// Create camera & listener
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000); // (fov, aspect, near, far):
 camera.position.set(0, 5, 10);
+
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+
+// Create audio loader for sound effects
+const audioloader = new THREE.AudioLoader();
+
+const backgroundSound = new THREE.Audio(listener);
+audioloader.load('./public/SchoolBackground.mp3', function(buffer) {
+    backgroundSound.setBuffer(buffer);
+    backgroundSound.setLoop(true); // loop when done
+    backgroundSound.setVolume(0.4);
+    backgroundSound.play();
+});
+
+const clickSound = new THREE.Audio(listener);
+audioloader.load('./public/MouseClick.mp3', function(buffer) {
+    clickSound.setBuffer(buffer);
+    clickSound.setLoop(false);
+    clickSound.setVolume(1.0);
+});
 
 
 // Create renderer
@@ -94,6 +114,8 @@ let animateReady = true; // Controls when nextStep can be triggered
 
 function nextStep() {
     if (!animateReady) return; // Prevent multiple clicks while animating
+
+    clickSound.play(); // Play click sound
 
     step++;
     if (step >= steps.length) step = 0; // Restart at the beginning
@@ -147,6 +169,7 @@ function showConclusionOverlay(onClick) {
 
     // Click to trigger the next step
     overlay.addEventListener('click', function handleClick() {
+        clickSound.play(); // Play click sound
         overlay.animate([{ opacity: 1 }, { opacity: 0 }], {
             duration: 500,
             fill: 'forwards'
@@ -740,26 +763,6 @@ function stepFive(onComplete) {
     animate();
 }
 
-const fontLoader = new FontLoader();
-function addLabel(text) {
-    fontLoader.load('https://threejs.org/examples/fonts/helvetiker_regular.typeface.json', function (font) {
-        const textGeometry = new TextGeometry(text, {
-            font: font,
-            size: 0.2,
-            depth: 0.1
-        })
-
-        const textMesh = new THREE.Mesh(textGeometry, [
-            new THREE.MeshPhongMaterial({ color: 0xffffff }), // front
-            new THREE.MeshPhongMaterial({ color: 0x000000 }) // side
-        ])
-
-        textMesh.castShadow = true;
-        textMesh.position.set(-1.65, 2.8, 3.5);
-        scene.add(textMesh);
-    });
-}
-
 // Add controls
 const controls = new OrbitControls(camera, renderer.domElement);
 
@@ -893,15 +896,6 @@ gltfLoader.load('./public/3D_Expt2.gltf', function(gltf){
             child.visible = false;
         });
     }
-
-    // if (elodeasps) {
-    //     // Add label above Elodea sp.
-    //     addLabel('Elodea sp.');
-    // }
-    // if (scene.getObjectByName('MICROSCOPE')) {
-    //     scene.getObjectByName('MICROSCOPE').visible = false; // Hide the object
-    // }
-
     
     console.log('Expt2 loaded');
 }, undefined, function(error){

@@ -58,6 +58,7 @@ loadingManager.onLoad = () => {
     progressBar.style.width = '100%';
 
     introOverlay.addEventListener('click', () => {
+        clickSound.play(); // Play click sound
         introOverlay.classList.add('fade-out');
         setTimeout(() => {
             introOverlay.style.display = 'none';
@@ -69,9 +70,31 @@ loadingManager.onLoad = () => {
 const scene = new THREE.Scene();
 
 
-// Create camera
+// Create camera & listener
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000); // (fov, aspect, near, far):
 camera.position.set(0.5, 6, 7);
+
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+
+// Create audio loader for sound effects
+const audioloader = new THREE.AudioLoader();
+
+const backgroundSound = new THREE.Audio(listener);
+audioloader.load('./public/SchoolBackground.mp3', function(buffer) {
+    backgroundSound.setBuffer(buffer);
+    backgroundSound.setLoop(true); // loop when done
+    backgroundSound.setVolume(0.4);
+    backgroundSound.play();
+});
+
+const clickSound = new THREE.Audio(listener);
+audioloader.load('./public/MouseClick.mp3', function(buffer) {
+    clickSound.setBuffer(buffer);
+    clickSound.setLoop(false);
+    clickSound.setVolume(1.0);
+});
 
 // Create renderer
 let renderer;
@@ -97,6 +120,8 @@ let animateReady = true; // Controls when nextStep can be triggered
 
 function nextStep() {
     if (!animateReady) return; // Prevent multiple clicks while animating
+
+    clickSound.play(); // Play click sound
 
     step++;
     if (step >= steps.length) step = 0; // Restart at the beginning
@@ -150,6 +175,7 @@ function showConclusionOverlay(onClick) {
 
     // Click to trigger the next step
     overlay.addEventListener('click', function handleClick() {
+        clickSound.play(); // Play click sound
         overlay.animate([{ opacity: 1 }, { opacity: 0 }], {
             duration: 500,
             fill: 'forwards'
@@ -264,9 +290,8 @@ function stepTwo(onComplete) {
                 requestAnimationFrame(animate);
             } else {
                 setTimeout(() => {
-                    animateSwab();
+                    animateSwab(onComplete);
                 }, 500);
-                if (onComplete) onComplete();
             }
         }
         animate();

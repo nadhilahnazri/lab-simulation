@@ -38,6 +38,7 @@ loadingManager.onLoad = () => {
     progressBar.style.width = '100%';
 
     introOverlay.addEventListener('click', () => {
+        clickSound.play(); // Play click sound
         introOverlay.classList.add('fade-out');
         setTimeout(() => {
             introOverlay.style.display = 'none';
@@ -49,9 +50,31 @@ loadingManager.onLoad = () => {
 const scene = new THREE.Scene();
 
 
-// Create camera
+// Create camera & listener
 const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 1000); // (fov, aspect, near, far):
 camera.position.set(0, 5, 10);
+
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+
+// Create audio loader for sound effects
+const audioloader = new THREE.AudioLoader();
+
+const backgroundSound = new THREE.Audio(listener);
+audioloader.load('./public/Education.mp3', function(buffer) {
+    backgroundSound.setBuffer(buffer);
+    backgroundSound.setLoop(true); // loop when done
+    backgroundSound.setVolume(0.4);
+    backgroundSound.play();
+});
+
+const clickSound = new THREE.Audio(listener);
+audioloader.load('./public/MouseClick.mp3', function(buffer) {
+    clickSound.setBuffer(buffer);
+    clickSound.setLoop(false);
+    clickSound.setVolume(1.0);
+});
 
 
 // Create renderer
@@ -78,6 +101,8 @@ let animateReady = true; // Controls when nextStep can be triggered
 
 function nextStep() {
     if (!animateReady) return; // Prevent multiple clicks while animating
+
+    clickSound.play(); // Play click sound
 
     step++;
     if (step >= steps.length) step = 0; // Restart at the beginning
@@ -127,6 +152,7 @@ function showConclusionOverlay(onClick) {
 
     // Click to trigger the next step
     overlay.addEventListener('click', function handleClick() {
+        clickSound.play(); // Play click sound
         overlay.animate([{ opacity: 1 }, { opacity: 0 }], {
             duration: 500,
             fill: 'forwards'
@@ -525,158 +551,6 @@ function stepTwo(onComplete) {
     animateGlove(performance.now());
 
 }
-
-// function stepThree(onComplete) {
-//     const duration = 500;
-//     const durationLong = 1000;
-//     const startTime = performance.now();
-//     procedure.visible = true;
-
-//     // Water beaker movement & rotation
-//     const waterTarget = new THREE.Vector3(5, 35, 0);
-//     //const waterTarget = new THREE.Vector3(0, 1, 0);
-//     const waterStart = warmWater.position.clone();
-//     const waterRotationTarget = new THREE.Euler(0, 0, -THREE.MathUtils.degToRad(37));
-//     const waterRotationStart = warmWater.rotation.clone();
-
-//     // Water in boiling tube
-//     waterTube.visible = true;
-//     const waterTubeStart = new THREE.Vector3(1, 0, 1);
-//     const waterTubeTarget = new THREE.Vector3(1, 1, 1);
-
-//     // 1. Pour warm water
-//     function pourWater(startTime) {
-//         function animate() {
-//             const elapsedTime = performance.now() - startTime;
-//             const t = Math.min(elapsedTime / duration, 1); // Normalize [0, 1]
-
-//             // Pour
-//             warmWater.position.lerpVectors(waterStart, waterTarget, t);
-//             warmWater.rotation.set(
-//                 warmWater.rotation.x,
-//                 warmWater.rotation.y,
-//                 THREE.MathUtils.lerp(waterRotationStart.z, waterRotationTarget.z, t)
-//             );
-
-//             // Scale up water in tube
-//             waterTube.scale.lerpVectors(waterTubeStart, waterTubeTarget, t);
-
-//             if (t < 1) {
-//                 requestAnimationFrame(animate);
-//             } else {
-//                 setTimeout(() => {
-//                     returnWater(performance.now());
-//                 }, 500); // Wait before returning
-//             }
-//         }
-//         animate();
-//     }
-
-//     // 2. return water
-//     function returnWater(startTime) {
-//         function animate() {
-//             const elapsedTime = performance.now() - startTime;
-//             const t = Math.min(elapsedTime / duration, 1); // Normalize [0, 1]
-    
-//             // Return
-//             warmWater.position.lerpVectors(waterTarget, waterStart, t);
-//             warmWater.rotation.set(
-//                     THREE.MathUtils.lerp(waterRotationTarget.x, waterRotationStart.x, t),
-//                     THREE.MathUtils.lerp(waterRotationTarget.y, waterRotationStart.y, t),
-//                     THREE.MathUtils.lerp(waterRotationTarget.z, waterRotationStart.z, t)
-//             );
-
-//             // Add a pop-up notice
-//             popupNotice.innerText = "    NOTE: If using bottles, you may use the bottle cap";
-//             popupNotice.style.position = 'absolute';
-//             popupNotice.style.top = '15%';
-//             popupNotice.style.left = '50%';
-//             popupNotice.style.transform = 'translate(-50%, -50%)';
-//             popupNotice.style.padding = '20px';
-//             popupNotice.style.background = 'rgba(0, 0, 0, 0.8)';
-//             popupNotice.style.color = 'white';
-//             popupNotice.style.fontSize = '16px';
-//             popupNotice.style.borderRadius = '8px';
-//             popupNotice.style.zIndex = '1000';
-//             popupNotice.style.textAlign = 'center';
-//             popupNotice.style.display = 'none';
-//             popupNotice.style.display = 'block';
-
-//             // Fade in the popupNotice
-//             popupNotice.style.opacity = 0;
-//             popupNotice.style.transition = 'opacity 0.5s ease-in-out';
-//             setTimeout(() => {
-//                 popupNotice.style.opacity = 1;
-//             }, 0);
-
-            
-    
-//             if (t < 1) {
-//                 requestAnimationFrame(animate);
-//             } else {
-//                 plugStopper(performance.now());
-//             }
-//         }
-//         animate();
-//     }
-
-//     const plugTarget = new THREE.Vector3(5.6, 23, -11.7);
-//     const plugStart = rubberStopper.position.clone();
-
-//     // 3. Plug stopper
-//     function plugStopper(startTime){
-//         function animate() {
-//             document.body.appendChild(popupNotice);
-//             const elapsedTime = performance.now() - startTime;
-//             const t = Math.min(elapsedTime / duration, 1); // Normalize [0, 1]
-
-//             rubberStopper.position.lerpVectors(plugStart, plugTarget, t);
-
-//             if (t < 1) {
-//                 requestAnimationFrame(animate);
-//             } else {
-//                 rubberTube.visible = true;
-//                 rubberStopper.visible = false;
-//                 shakeTube(performance.now());
-//             }
-//         }
-//         animate();
-//     }
-
-//     // 4. Shake tube
-//     function shakeTube(startTime) {
-//         function animate() {
-//             const elapsedTime = performance.now() - startTime;
-//             const t = Math.min(elapsedTime / durationLong, 1); // Normalize [0, 1]
-
-//             // Shake the tube
-//             boilingTube.rotation.x = Math.sin(t * Math.PI * 10) * 0.2;
-//             boilingTube.rotation.y = Math.sin(t * Math.PI * 10) * 0.2;
-//             procedure.rotation.x = Math.sin(t * Math.PI * 10) * 0.2;
-//             procedure.rotation.y = Math.sin(t * Math.PI * 10) * 0.2;
-//             waterBubble.rotation.x = Math.sin(t * Math.PI * 10) * 0.2;
-//             waterBubble.rotation.y = Math.sin(t * Math.PI * 10) * 0.2;
-
-//             // Show shaken result
-//             afterResult.visible = true;
-//             waterBubble.visible = true;
-
-//             if (t < 1) {
-//                 requestAnimationFrame(animate);
-//             } else {
-//                 waterTube.visible = false;
-//                 yeastTube.visible = false;
-//                 sugarTube.visible = false;
-//                 if (onComplete) onComplete();
-//             }
-
-//         }
-//         animate();
-//     }
-
-//     // Start
-//     pourWater(performance.now());
-// }
 
 function stepThree(onComplete) {
     const lightStart = uvlight.position.clone();
